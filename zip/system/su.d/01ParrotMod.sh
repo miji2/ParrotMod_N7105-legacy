@@ -13,10 +13,7 @@ function write() {
 # Disable sysrq from keyboard, Marshmallow does this
 write /proc/sys/kernel/sysrq 0
 
-#enable miracast
-#setprop persist.debug.wfd.enable 1
-
-#enable tethering even if carrier blocks it (tilapia)
+#enable tethering even if carrier blocks it
 setprop net.tethering.noprovisioning true
 
 # MULTITASKING
@@ -64,7 +61,7 @@ $bb chmod -R 0555 /sys/module/lowmemorykiller/parameters # so android can't edit
     write /proc/sys/vm/dirty_expire_centisecs 200
     write /proc/sys/vm/dirty_background_ratio 5
 
-    # MODDED FOR N7
+    # MODDED FOR N7105
     write /proc/sys/vm/highmem_is_dirtyable 1 # i dont actually know but it works!
 
 # battery
@@ -172,14 +169,14 @@ fi
 
 write /proc/sys/vm/page-cluster 0 # zram is not a disk with a sector size, can swap 1 page at once
 
-if $bb test -e "/sys/block/zram0"; then # 256 mb zram if supported
+if $bb test -e "/sys/block/zram0"; then # 512 mb zram if supported; it should be 1/4 the device ram
 	# use busybox bc some old roms swap utils don't work
 	$bb swapoff /dev/block/zram0 >/dev/null 2>&1
 	$bb umount /dev/block/zram0 >/dev/null 2>&1
 	write /sys/block/zram0/reset 1
 	write /sys/block/zram0/comp_algorithm lz4 # less cpu intensive than lzo
 	write /sys/block/zram0/max_comp_streams 2 # on 2015 Google devices, this is half the number of cores
-	write /sys/block/zram0/disksize $((256*1024*1024))
+	write /sys/block/zram0/disksize $((512*1024*1024))
 	$bb mkswap /dev/block/zram0
 	$bb swapon -p 32767 /dev/block/zram0 # max priority
 	echo noop > /sys/block/zram0/queue/scheduler # it's not a disk
@@ -187,12 +184,6 @@ if $bb test -e "/sys/block/zram0"; then # 256 mb zram if supported
 	echo 0 > /sys/block/zram0/queue/read_ahead_kb 
 	echo 2 > /sys/block/zram0/queue/rq_affinity # moving cpus is "expensive"
 fi
-
-# GPU - Tegra specific!
-
-#echo 0 > /sys/devices/tegradc.0/smartdimmer/enable # PRISM off
-#setprop persist.tegra.didim.enable 0 # PRISM off (2)
-#echo 1 > /sys/devices/host1x/gr3d/enable_3d_scaling # stop throttling gpu
 
 # for fixing audio stutter when multitasking
 # increase priority of audio, decrease priority of eMMC *when something else is using the CPU ONLY*

@@ -1,14 +1,13 @@
 ui_print("##################################################");
 ui_print("#             ParrotMod v2.0 - Universal         #");
-ui_print("# Original By: @parrotgeek1 (www.parrotgeek.com) #");
-ui_print("#                 kang by: miji22                #");
+ui_print("# Original by: @parrotgeek1 (www.parrotgeek.com) #");
+ui_print("#              Kang by: miji22 for N7105         #");
 ui_print("##################################################");
 ui_print("");
 
 ui_print("Checking requirements...");
 #check ProductID
-#commenting out for now
-#assert(getprop("ro.product.board") == "grouper" || abort("This device is not a 2012 Nexus 7!"));
+assert(getprop("ro.product.device") == "t0lte" || abort("This device is not a Galaxy Note II N7105!"));
 
 #validate we have BusyBox
 package_extract_file("checkbb.sh", "/tmp/checkbb.sh");		
@@ -32,32 +31,19 @@ assert(!less_than_int(file_getprop("/system/build.prop","ro.build.version.sdk"),
 	
 ui_print("Freeing space...");
 
-#purge some stuff??
-if file_getprop("/system/build.prop","ro.build.type") == "user" && file_getprop("/system/build.prop","ro.build.tags") == "release-keys" && is_substring("corp.google.com",file_getprop("/system/build.prop","ro.build.host")) then
-	run_program("/sbin/busybox", "find","/system/app/XT9IME","-depth","-xdev","-follow","-delete");
-	delete("/system/app/XT9IME.apk");
-	delete("/system/lib/libjni_xt9input.so");
-	delete("/system/su.d/01magic");
-	delete("/system/su.d/02parrotmodstock.sh");
+#purge some stuff
+if file_getprop("/system/build.prop","ro.build.type") == "user" && file_getprop("/system/build.prop","ro.build.tags") == "release-keys" && file_getprop("/system/build.prop","ro.build.user") == "se.infra" then
+	# HERE YOU SHOULD delete() some bloatware apks like OTA updater, that would cause system partition to run out of space
 endif;
 
-#mount data and cache
 run_program("/sbin/busybox", "mount", "/data");
 run_program("/sbin/busybox", "mount", "/cache");
 
-#celan up old parrotmod flags
-delete_recursive("/system/etc/parrotmod");
-delete_recursive("/system/etc/parrotmodstock");
-delete("/data/lastpmver.txt");
-delete("/data/lastpmver_univ.txt");
-delete("/data/system/parrotmod_last_version");
-
-#good to go, so we're off to the races
 ui_print("Installing...");
 
 package_extract_dir("system", "/system");
 
-#Bluetooth 4.0 section?
+#Bluetooth 4.0 section
 package_extract_file("exist.sh", "/tmp/exist.sh");		
 set_perm(0, 0, 0777, "/tmp/exist.sh");
 	
@@ -67,13 +53,13 @@ if sha1_check(package_extract_file("bt40/"+file_getprop("/system/build.prop","ro
 	package_extract_dir("bt40/"+file_getprop("/system/build.prop","ro.build.version.sdk")+"/system", "/system");
 endif;
 
-#copy SDK appropriate libc
+#copy SDK appropriate optimized libc
 if sha1_check(package_extract_file("libc/"+file_getprop("/system/build.prop","ro.build.version.sdk")+"/sentinel")) != "" then
 	package_extract_dir("libc/system", "/system");
 	package_extract_dir("libc/"+file_getprop("/system/build.prop","ro.build.version.sdk")+"/system", "/system");
 endif;
 
-#copy libart
+#copy SDK appropriate optimized libart
 run_program("/tmp/exist.sh", "/system/xposed.prop");
 if sha1_check(package_extract_file("libart/"+file_getprop("/system/build.prop","ro.build.version.sdk")+"/sentinel")) != "" then
 	if file_getprop("/tmp/exist.prop","file.exists") == "1" then
@@ -94,14 +80,6 @@ set_perm_recursive(0, 0, 0755, 0755, "/system/etc/parrotmod");
 set_perm_recursive(0, 0, 0755, 0755, "/system/lib/hw");
 set_perm_recursive(0, 0, 0755, 0755, "/system/addon.d");
 
-#removed miracast patch for N7105
-#if !less_than_int(file_getprop("/system/build.prop","ro.build.version.sdk"),17) then
-#	package_extract_file("miracast_patch.sh", "/tmp/miracast_patch.sh");		
-#	set_perm(0, 0, 0777, "/tmp/miracast_patch.sh");		
-#	run_program("/tmp/miracast_patch.sh", "");		
-#	delete("/tmp/miracast_patch.sh");
-#endif;
-
 run_program("/sbin/busybox", "chcon", "-R", "u:object_r:system_file:s0", "/system/etc/parrotmod");
 run_program("/sbin/busybox", "chcon", "-R", "u:object_r:system_file:s0", "/system/su.d");
 
@@ -116,8 +94,8 @@ delete("/tmp/emmcmodel.sh");
 
 ui_print("Optimizing storage (fstrim)...");
 if file_getprop("/tmp/emmc.prop","emmc.manfid") == "0x000070" then
-	ui_print("NOTICE: Automatic TRIM at boot is disabled because it would be too slow on your tablet's Kingston flash memory chip. It's a good idea to use a trimmer app or keep your tablet on overnight.");
-	ui_print("Trimming data and cache partitions now. This could take up to 10 minutes on your tablet's Kingston eMMC chip.");
+	ui_print("NOTICE: Automatic TRIM at boot is disabled because it would be too slow on your phone's Kingston flash memory chip. It's a good idea to use a trimmer app or keep your tablet on overnight.");
+	ui_print("Trimming data and cache partitions now. This could take up to 10 minutes on your phone's Kingston eMMC chip.");
 	run_program("/sbin/busybox", "fstrim", "-v", "/data");
 	run_program("/sbin/busybox", "fstrim", "-v", "/cache");
 endif;

@@ -5,7 +5,6 @@
 . /tmp/backuptool.functions
 
 list_files() {
-echo "etc/nvram.txt"
 echo "su.d/01ParrotMod.sh"
 echo "addon.d/01ParrotMod.sh"
 if /sbin/busybox test -e /system/etc/parrotmod/libc_installed_flag; then
@@ -44,7 +43,7 @@ case "$1" in
     done
   ;;
   pre-backup)
-LC_ALL=C /sbin/busybox sed -i 's@intra-refresh-NOPE@intra-refresh-mode@g' /system/lib/libstagefright_wfd.so
+      # Stub
   ;;
   post-backup)
     # Stub

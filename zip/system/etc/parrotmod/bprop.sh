@@ -16,7 +16,6 @@ comment_out ro.config.low_ram # same ^
 change_or_add ro.config.max_starting_bg 1 # fix boot lag
 
 # hwui cache settings https://source.android.com/devices/tech/config/renderer.html
-change_or_add ro.hwui.disable_scissor_opt 1 # it is on some tegra3/4
 change_or_add ro.hwui.texture_cache_size 20 # was 24, save 4M ram per process!
 change_or_add ro.hwui.texture_cache_flush_rate 0.5 # recommended value by Google! was 0.6
 change_or_add ro.hwui.gradient_cache_size 0.1 # in mb. A single gradient = 1-4 KB. recommended large enough to hold at least 12 was 0.5

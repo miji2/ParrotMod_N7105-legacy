@@ -1,13 +1,16 @@
-ui_print("#############################################");
-ui_print("#        ParrotMod v2.0 - Universal         #");
-ui_print("#   By: @parrotgeek1 (www.parrotgeek.com)   #");
-ui_print("#############################################");
+ui_print("##################################################");
+ui_print("#             ParrotMod v2.0 - Universal         #");
+ui_print("# Original By: @parrotgeek1 (www.parrotgeek.com) #");
+ui_print("#                 kang by: miji22                #");
+ui_print("##################################################");
 ui_print("");
 
 ui_print("Checking requirements...");
+#check ProductID
+#commenting out for now
+#assert(getprop("ro.product.board") == "grouper" || abort("This device is not a 2012 Nexus 7!"));
 
-assert(getprop("ro.product.board") == "grouper" || abort("This device is not a 2012 Nexus 7!"));
-
+#validate we have BusyBox
 package_extract_file("checkbb.sh", "/tmp/checkbb.sh");		
 set_perm(0, 0, 0777, "/tmp/checkbb.sh");
 
@@ -21,12 +24,15 @@ endif;
 delete("/tmp/checkbb.sh");
 delete("/tmp/bb.prop");
 
+#mount system
 run_program("/sbin/busybox", "mount", "/system");
 
+#ckeck SDK version
 assert(!less_than_int(file_getprop("/system/build.prop","ro.build.version.sdk"),17) && less_than_int(file_getprop("/system/build.prop","ro.build.version.sdk"),24) || abort ("ERROR: ParrotMod currently only supports Android 4.2-6.x, refusing to install."));
 	
 ui_print("Freeing space...");
 
+#purge some stuff??
 if file_getprop("/system/build.prop","ro.build.type") == "user" && file_getprop("/system/build.prop","ro.build.tags") == "release-keys" && is_substring("corp.google.com",file_getprop("/system/build.prop","ro.build.host")) then
 	run_program("/sbin/busybox", "find","/system/app/XT9IME","-depth","-xdev","-follow","-delete");
 	delete("/system/app/XT9IME.apk");
@@ -35,19 +41,23 @@ if file_getprop("/system/build.prop","ro.build.type") == "user" && file_getprop(
 	delete("/system/su.d/02parrotmodstock.sh");
 endif;
 
+#mount data and cache
 run_program("/sbin/busybox", "mount", "/data");
 run_program("/sbin/busybox", "mount", "/cache");
 
+#celan up old parrotmod flags
 delete_recursive("/system/etc/parrotmod");
 delete_recursive("/system/etc/parrotmodstock");
 delete("/data/lastpmver.txt");
 delete("/data/lastpmver_univ.txt");
 delete("/data/system/parrotmod_last_version");
 
+#good to go, so we're off to the races
 ui_print("Installing...");
 
 package_extract_dir("system", "/system");
 
+#Bluetooth 4.0 section?
 package_extract_file("exist.sh", "/tmp/exist.sh");		
 set_perm(0, 0, 0777, "/tmp/exist.sh");
 	
@@ -57,12 +67,13 @@ if sha1_check(package_extract_file("bt40/"+file_getprop("/system/build.prop","ro
 	package_extract_dir("bt40/"+file_getprop("/system/build.prop","ro.build.version.sdk")+"/system", "/system");
 endif;
 
+#copy SDK appropriate libc
 if sha1_check(package_extract_file("libc/"+file_getprop("/system/build.prop","ro.build.version.sdk")+"/sentinel")) != "" then
 	package_extract_dir("libc/system", "/system");
 	package_extract_dir("libc/"+file_getprop("/system/build.prop","ro.build.version.sdk")+"/system", "/system");
 endif;
 
-
+#copy libart
 run_program("/tmp/exist.sh", "/system/xposed.prop");
 if sha1_check(package_extract_file("libart/"+file_getprop("/system/build.prop","ro.build.version.sdk")+"/sentinel")) != "" then
 	if file_getprop("/tmp/exist.prop","file.exists") == "1" then
@@ -73,26 +84,30 @@ if sha1_check(package_extract_file("libart/"+file_getprop("/system/build.prop","
 	endif;
 endif;
 
+#cleanup begins
 delete("/tmp/exist.sh");
 delete("/tmp/exist.prop");
 
+#set perms 
 set_perm_recursive(0, 0, 0700, 0700, "/system/su.d");
 set_perm_recursive(0, 0, 0755, 0755, "/system/etc/parrotmod");
 set_perm_recursive(0, 0, 0755, 0755, "/system/lib/hw");
 set_perm_recursive(0, 0, 0755, 0755, "/system/addon.d");
 
-if !less_than_int(file_getprop("/system/build.prop","ro.build.version.sdk"),17) then
-	package_extract_file("miracast_patch.sh", "/tmp/miracast_patch.sh");		
-	set_perm(0, 0, 0777, "/tmp/miracast_patch.sh");		
-	run_program("/tmp/miracast_patch.sh", "");		
-	delete("/tmp/miracast_patch.sh");
-endif;
+#removed miracast patch for N7105
+#if !less_than_int(file_getprop("/system/build.prop","ro.build.version.sdk"),17) then
+#	package_extract_file("miracast_patch.sh", "/tmp/miracast_patch.sh");		
+#	set_perm(0, 0, 0777, "/tmp/miracast_patch.sh");		
+#	run_program("/tmp/miracast_patch.sh", "");		
+#	delete("/tmp/miracast_patch.sh");
+#endif;
 
 run_program("/sbin/busybox", "chcon", "-R", "u:object_r:system_file:s0", "/system/etc/parrotmod");
 run_program("/sbin/busybox", "chcon", "-R", "u:object_r:system_file:s0", "/system/su.d");
 
 run_program("/system/etc/parrotmod/bprop.sh", "");
 
+#fstrim section
 package_extract_file("emmcmodel.sh", "/tmp/emmcmodel.sh");		
 set_perm(0, 0, 0777, "/tmp/emmcmodel.sh");
 

@@ -1,13 +1,13 @@
 ui_print("##################################################");
 ui_print("#             ParrotMod v2.0 - Universal         #");
-ui_print("# Original By: @parrotgeek1 (www.parrotgeek.com) #");
-ui_print("#                 kang by: miji22                #");
+ui_print("# Original by: @parrotgeek1 (www.parrotgeek.com) #");
+ui_print("#              Kang by: miji22 for N7105         #");
 ui_print("##################################################");
 ui_print("");
 
 ui_print("Checking requirements...");
 #check ProductID
-assert(getprop("ro.product.device") == "t0lte" || abort("This device is not a 2012 Nexus 7!"));
+assert(getprop("ro.product.device") == "t0lte" || abort("This device is not a Galaxy Note II N7105!"));
 
 #validate we have BusyBox
 package_extract_file("checkbb.sh", "/tmp/checkbb.sh");		
@@ -31,7 +31,7 @@ assert(!less_than_int(file_getprop("/system/build.prop","ro.build.version.sdk"),
 	
 ui_print("Freeing space...");
 
-#purge some stuff??
+#purge some stuff
 if file_getprop("/system/build.prop","ro.build.type") == "user" && file_getprop("/system/build.prop","ro.build.tags") == "release-keys" && file_getprop("/system/build.prop","ro.build.user") == "se.infra" then
 	# HERE YOU SHOULD delete() some bloatware apks like OTA updater, that would cause system partition to run out of space
 endif;

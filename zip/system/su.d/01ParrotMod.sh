@@ -14,7 +14,7 @@ function write() {
 write /proc/sys/kernel/sysrq 0
 
 #enable miracast
-setprop persist.debug.wfd.enable 1
+#setprop persist.debug.wfd.enable 1
 
 #enable tethering even if carrier blocks it (tilapia)
 setprop net.tethering.noprovisioning true
@@ -188,11 +188,11 @@ if $bb test -e "/sys/block/zram0"; then # 256 mb zram if supported
 	echo 2 > /sys/block/zram0/queue/rq_affinity # moving cpus is "expensive"
 fi
 
-# GPU
+# GPU - Tegra specific!
 
-echo 0 > /sys/devices/tegradc.0/smartdimmer/enable # PRISM off
-setprop persist.tegra.didim.enable 0 # PRISM off (2)
-echo 1 > /sys/devices/host1x/gr3d/enable_3d_scaling # stop throttling gpu
+#echo 0 > /sys/devices/tegradc.0/smartdimmer/enable # PRISM off
+#setprop persist.tegra.didim.enable 0 # PRISM off (2)
+#echo 1 > /sys/devices/host1x/gr3d/enable_3d_scaling # stop throttling gpu
 
 # for fixing audio stutter when multitasking
 # increase priority of audio, decrease priority of eMMC *when something else is using the CPU ONLY*

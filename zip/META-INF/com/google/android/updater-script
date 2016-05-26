@@ -36,9 +36,8 @@ assert(!less_than_int(file_getprop("/system/build.prop","ro.build.version.sdk"),
 ui_print("Freeing space...");
 
 #purge some stuff
-if file_getprop("/system/build.prop","ro.build.type") == "user" && file_getprop("/system/build.prop","ro.build.tags") == "release-keys" && file_getprop("/system/build.prop","ro.build.user") == "se.infra" then
-	# HERE YOU SHOULD delete() some bloatware apks like OTA updater, that would cause system partition to run out of space
-endif;
+# HERE YOU SHOULD delete() some bloatware apks like OTA updater, that would cause system partition to run out of space
+
 
 run_program("/sbin/busybox", "mount", "/data");
 run_program("/sbin/busybox", "mount", "/cache");
